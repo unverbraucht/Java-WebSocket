@@ -172,6 +172,10 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 			onWebsocketError( engine, e );
 			engine.closeConnection( CloseFrame.NEVER_CONNECTED, e.getMessage() );
 			return;
+		} catch (AssertionError e) {
+			onWebsocketError( engine, new RuntimeException("Catch buggy android SocketTimeoutException") );
+			engine.closeConnection( CloseFrame.NEVER_CONNECTED, e.getMessage() );
+			return;
 		}
 
 		writeThread = new Thread( new WebsocketWriteThread() );
@@ -191,6 +195,10 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 			// this catch case covers internal errors only and indicates a bug in this websocket implementation
 			onError( e );
 			engine.closeConnection( CloseFrame.ABNORMAL_CLOSE, e.getMessage() );
+		} catch (AssertionError e) {
+			onError( new RuntimeException("Catch buggy android SocketTimeoutException") );
+			engine.closeConnection( CloseFrame.ABNORMAL_CLOSE, e.getMessage() );
+			return;
 		}
 		assert ( socket.isClosed() );
 	}
@@ -356,6 +364,8 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 				engine.eot();
 			} catch ( InterruptedException e ) {
 				// this thread is regularly terminated via an interrupt
+			} catch (AssertionError e) {
+				engine.eot();
 			}
 		}
 	}
