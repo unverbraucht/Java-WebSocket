@@ -104,7 +104,12 @@ public class WebSocketImpl implements WebSocket {
 	
 	private String resourceDescriptor = null;
 
-	/**
+    private long trafficIn = 0, trafficOut = 0;
+    private int[] trafficInPerMinute = { -1, -1, -1, -1, -1, -1};
+    private int[] trafficOutPerMinute = { -1, -1, -1, -1, -1, -1};
+    private int lastTimeSlot;
+
+    /**
 	 * crates a websocket with server role
 	 */
 	public WebSocketImpl( WebSocketListener listener , List<Draft> drafts ) {
@@ -120,9 +125,7 @@ public class WebSocketImpl implements WebSocket {
 
 	/**
 	 * crates a websocket with client role
-	 * 
-	 * @param socket
-	 *            may be unbound
+	 *
 	 */
 	public WebSocketImpl( WebSocketListener listener , Draft draft ) {
 		if( listener == null || ( draft == null && role == Role.SERVER ) )// socket can be null because we want do be able to create the object without already having a bound channel
@@ -134,6 +137,36 @@ public class WebSocketImpl implements WebSocket {
 		if( draft != null )
 			this.draft = draft.copyInstance();
 	}
+
+    public long getInTraffic() {
+        return trafficIn;
+    }
+
+    public long getOutTraffic() {
+        return trafficOut;
+    }
+
+    public int getInTrafficPerMinute() {
+        int numFieldsFound = 0, sum = 0;
+        for (int i = 0; i < 6; i++) {
+            if (trafficInPerMinute[i] >= 0) {
+                sum += trafficInPerMinute[i];
+                numFieldsFound++;
+            }
+        }
+        return sum / numFieldsFound;
+    }
+
+    public int getOutTrafficPerMinute() {
+        int numFieldsFound = 0, sum = 0;
+        for (int i = 0; i < 6; i++) {
+            if (trafficInPerMinute[i] >= 0) {
+                sum += trafficOutPerMinute[i];
+                numFieldsFound++;
+            }
+        }
+        return sum / numFieldsFound;
+    }
 
 	@Deprecated
 	public WebSocketImpl( WebSocketListener listener , Draft draft , Socket socket ) {
@@ -549,6 +582,24 @@ public class WebSocketImpl implements WebSocket {
 			throw new IllegalArgumentException( "Cannot send 'null' data to a WebSocketImpl." );
 		send( draft.createFrames( text, role == Role.CLIENT ) );
 	}
+
+    public void addTraffic(final int outTraffic, final int inTraffic) {
+        final int nowSlot = (int)(System.currentTimeMillis() / 10000);
+        final int nowIndex = nowSlot % 6;
+        if (nowSlot != lastTimeSlot) {
+            trafficOutPerMinute[nowIndex] = -1;
+            trafficInPerMinute[nowIndex] = -1;
+            lastTimeSlot = nowSlot;
+        }
+        if (outTraffic > 0) {
+            trafficOut += outTraffic;
+            trafficOutPerMinute[nowIndex] += ((trafficOutPerMinute[nowIndex] < 0) ? 1 : 0) + outTraffic;
+        }
+        if (inTraffic > 0) {
+            trafficIn += inTraffic;
+            trafficInPerMinute[nowIndex] += ((trafficInPerMinute[nowIndex] < 0) ? 1 : 0) + inTraffic;
+        }
+    }
 
 	/**
 	 * Send Binary data (plain bytes) to the other end.

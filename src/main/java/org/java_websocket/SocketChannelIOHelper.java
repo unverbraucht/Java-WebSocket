@@ -51,7 +51,8 @@ public class SocketChannelIOHelper {
 			}
 		} else {
 			do {// FIXME writing as much as possible is unfair!!
-				/*int written = */sockchannel.write( buffer );
+				int written = sockchannel.write( buffer );
+                ws.addTraffic(written, 0);
 				if( buffer.remaining() > 0 ) {
 					return false;
 				} else {

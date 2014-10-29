@@ -155,6 +155,22 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 		engine.send( data );
 	}
 
+    public long getInTraffic() {
+        return engine.getInTraffic();
+    }
+
+    public long getOutTraffic() {
+        return engine.getOutTraffic();
+    }
+
+    public int getOutTrafficPerMinute() {
+        return engine.getOutTrafficPerMinute();
+    }
+
+    public int getInTrafficPerMinute() {
+        return engine.getInTrafficPerMinute();
+    }
+
 	public void run() {
 		try {
 			if( socket == null ) {
@@ -186,6 +202,7 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 
 		try {
 			while ( !isClosed() && ( readBytes = istream.read( rawbuffer ) ) != -1 ) {
+                engine.addTraffic(0, readBytes);
 				engine.decode( ByteBuffer.wrap( rawbuffer, 0, readBytes ) );
 			}
 			engine.eot();
