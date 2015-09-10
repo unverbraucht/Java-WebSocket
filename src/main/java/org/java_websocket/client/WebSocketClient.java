@@ -189,6 +189,9 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 			engine.closeConnection( CloseFrame.NEVER_CONNECTED, e.getMessage() );
 			return;
 		} catch (AssertionError e) {
+			// https://github.com/TooTallNate/Java-WebSocket/issues/323
+			// Some weird Android implementations (seen on older Huawei devices) throw AssertionErrors instead of
+			// SocketTimeoutExceptions
 			onWebsocketError( engine, new RuntimeException("Catch buggy android SocketTimeoutException") );
 			engine.closeConnection( CloseFrame.NEVER_CONNECTED, e.getMessage() );
 			return;
@@ -213,6 +216,9 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 			onError( e );
 			engine.closeConnection( CloseFrame.ABNORMAL_CLOSE, e.getMessage() );
 		} catch (AssertionError e) {
+			// https://github.com/TooTallNate/Java-WebSocket/issues/323
+			// Some weird Android implementations (seen on older Huawei devices) throw AssertionErrors instead of
+			// SocketTimeoutExceptions
 			onError( new RuntimeException("Catch buggy android SocketTimeoutException") );
 			engine.closeConnection( CloseFrame.ABNORMAL_CLOSE, e.getMessage() );
 			return;
@@ -382,6 +388,9 @@ public abstract class WebSocketClient extends WebSocketAdapter implements Runnab
 			} catch ( InterruptedException e ) {
 				// this thread is regularly terminated via an interrupt
 			} catch (AssertionError e) {
+				// https://github.com/TooTallNate/Java-WebSocket/issues/323
+				// Some weird Android implementations (seen on older Huawei devices) throw AssertionErrors instead of
+				// SocketTimeoutExceptions
 				engine.eot();
 			}
 		}
