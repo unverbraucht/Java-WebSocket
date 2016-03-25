@@ -6,6 +6,7 @@ apply plugin: 'maven'
 repositories {
     mavenLocal()
     mavenCentral()
+    jcenter()
 }
 
 group = 'org.java_websocket'

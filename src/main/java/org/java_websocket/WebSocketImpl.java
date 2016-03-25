@@ -154,7 +154,10 @@ public class WebSocketImpl implements WebSocket {
                 numFieldsFound++;
             }
         }
-        return sum / numFieldsFound;
+		if (numFieldsFound > 0) {
+			return sum / numFieldsFound;
+		}
+		return 0;
     }
 
     public int getOutTrafficPerMinute() {
@@ -165,7 +168,10 @@ public class WebSocketImpl implements WebSocket {
                 numFieldsFound++;
             }
         }
-        return sum / numFieldsFound;
+        if (numFieldsFound > 0) {
+            return sum / numFieldsFound;
+        }
+        return 0;
     }
 
 	@Deprecated
